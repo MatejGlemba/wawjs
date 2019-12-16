@@ -29,7 +29,7 @@ function zip_client(name) {
     let request = http.request(url, {
         method: "POST",
         headers: {
-            'file-name': name
+            'fileName': name
         }
     })
         .on("response", (res) => {
@@ -61,7 +61,7 @@ function close_server() {
     let request = http.request(url, {
         method: "POST",
         headers: {
-            'close': true
+            'end': true
         }
     });
     request.on("error", (err) => {

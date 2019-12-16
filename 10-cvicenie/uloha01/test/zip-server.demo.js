@@ -1,7 +1,7 @@
 const server = require("../src/zip-server");
 const client = require("../src/zip-client");
 
-server.start();
+server();
 
 const files = ["test1.txt", "test2.jpg"];
 

@@ -1,4 +1,3 @@
-//
 const { Transform } = require("stream");
 
 module.exports = {
@@ -8,7 +7,7 @@ module.exports = {
     remove: function() {
         return new RemoveBom();
     }
-};
+}
 
 const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
 const bufLength = (bufs) =>
@@ -48,35 +47,31 @@ class AddBom extends Transform {
 
 class RemoveBom extends Transform {
 
-    constructor() {
+    constructor(){
         super();
+        this._bomDone = false;
         this._buff = [];
     }
 
-    _transform(chunk, enc, cb) {
-        if (this._bomRemoved){
+    _transform(chunk, enc, cb ){
+        if (this._bomDone)
             return cb(null, chunk);
-        }
-
         this._buff.push(chunk);
         if (bufLength(this._buff) >= 3)
             this._pushBuffered();
-
         cb();
-
     }
 
     _flush(cb) {
-        if (!this._bomRemoved)
+        if (!this._bomDone)
             this._pushBuffered();
         cb();
     }
 
     _pushBuffered() {
         let chunk = Buffer.concat([...this._buff]);
-        if (hasBom(chunk)) chunk = chunk.slice(3);
-        this.push(chunk);
-        this._bomRemoved = true;
+        this.push(hasBom(chunk) ? chunk.slice(3): chunk)
+        this._bomDone = true;
         this._buff = null;
     }
 

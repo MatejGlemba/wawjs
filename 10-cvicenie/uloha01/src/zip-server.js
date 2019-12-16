@@ -7,41 +7,29 @@ const {
     createGzip
 } = require("zlib");
 
-module.exports = {
-    start: function () {
-        return zip_server()
-    }
-};
-
-function zip_server() {
+function start_server() {
     let server = http.createServer();
     server.setTimeout(1000);
     server.listen(9999, "localhost")
         .on("request", (req, res) => {
+            const nameHead = req.headers["fileName"];
+            const endHead = req.headers["end"];
+            const fileName = `${__dirname}/serverFiles/${nameHead}`;
 
-            const name = req.headers["file-name"];
-            const close = req.headers["close"];
-
-
-            const fileName = `${__dirname}/serverFiles/${name}`;
-
-            if (close) {
+            if (endHead) {
                 server.close();
-                console.log("closing server");
             } else {
-
                 let output = fs.createWriteStream(fileName);
-
-                //Je tu toto treba inak sa neskopci vacsi file
+                //Pre skopirovanie vacsieho suboru
                 output.on("finish", () => {
                     pipeline(
                         fs.createReadStream(fileName),
                         createGzip(),
                         res,
                         (err) => {
-                            if (err) {
-                                console.error(err);
-                            }
+                          (err) => {
+                            console.log(err ? err : "File sent");
+                          }
                         }
                     );
                 });
@@ -50,11 +38,11 @@ function zip_server() {
                     req,
                     output,
                     (err) => {
-                        if (err) {
-                            console.error(err)
-                        }
+
                     });
             }
 
         });
 }
+
+module.exports = start_server
